@@ -37,11 +37,11 @@ public class Reserva {
     }
 
     public void agregarObservador(ObservadorReserva observador){
-        if (observador != null) observador.add(observador);
+        if (observador != null) observadores.add(observador);
     }
 
     public void retirarObservador(ObservadorReserva observador){
-        observador.remove(observador);
+        observadores.remove(observador);
     }
 
     public void confirmar(){
