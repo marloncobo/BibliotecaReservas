@@ -13,7 +13,7 @@ public class Reserva {
     private final Sala sala;
     private EstadoReserva estado;
 
-    Reserva(String codigo, Estudiante estudiante, LocalDate fecha, LocalTime horaInicio, int duracionHoras, int cantidadPersonas, Sala sala, EstadoReserva estado){
+    Reserva(String codigo, Estudiante estudiante, LocalDate fecha, LocalTime horaInicio, int duracionHoras, int cantidadPersonas, Sala sala){
         this.codigo = codigo;
         this.estudiante = estudiante;
         this.fecha = fecha;
@@ -21,7 +21,7 @@ public class Reserva {
         this.duracionHoras = duracionHoras;
         this.cantidadPersonas = cantidadPersonas;
         this.sala = sala;
-        this.estado = estado;
+        this.estado = Pendiente();
     }
 
     void cambiarEstado(EstadoReserva nuevoEstado){
