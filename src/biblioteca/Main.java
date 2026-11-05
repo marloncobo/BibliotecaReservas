@@ -8,85 +8,77 @@ public class Main {
 
     public static void main(String[] args) {
 
-        // Dependencias
-        RepositorioSalas repositorioSalas =
-                new RepositorioSalasMemoria();
+        RepositorioSalas salas = new RepositorioSalasMemoria();
+        RepositorioReservasMemoria reservas = new RepositorioReservasMemoria();
 
-        RepositorioReservas repositorioReservas =
-                new RepositorioReservasMemoria();
-
-        ReservaFacade facade = new ReservaFacade(
-                repositorioSalas,
-                repositorioReservas,
-                List.of(
-                    new NotificadorEstudiante(),
-                    new RegistroEventos()
-                )
+        List<ObservadorReserva> observadores = List.of(
+                new NotificadorEstudiante(),
+                new RegistroEventos()
         );
 
-        Estudiante estudiante =
-                new Estudiante("123", "Carlos");
+        ReservaFacade fachada = new ReservaFacade(salas, reservas, observadores);
 
-        EstrategiaSeleccionSala estrategia =
-                new SeleccionPorCapacidad();
+        Estudiante laura = new Estudiante("E001", "Laura");
 
-        // Crear primera reserva
-        Reserva reserva1 = facade.realizarReserva(
-                estudiante,
-                LocalDate.of(2026, 11, 10),
-                LocalTime.of(10, 0),
-                2,
-                4,
-                estrategia
-        ).orElseThrow();
+        System.out.println("=== ESCENARIO PRINCIPAL ===");
 
-        System.out.println("\nPRUEBA 1");
-        System.out.println("Estado: " + reserva1.getNombreEstado());
-
-        // PRUEBA 2: Cancelar una confirmada
-        System.out.println("\nPRUEBA 2");
-        reserva1.cancelar();
-        System.out.println("Estado: " + reserva1.getNombreEstado());
-
-        // PRUEBA 3: Confirmar una cancelada
-        System.out.println("\nPRUEBA 3");
-
-        try {
-            reserva1.confirmar();
-        } catch (IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-
-        // Crear segunda reserva
-        Reserva reserva2 = facade.realizarReserva(
-                estudiante,
-                LocalDate.of(2026, 11, 11),
+        Reserva reserva = fachada.realizarReserva(
+                laura,
+                LocalDate.now().plusDays(7),
                 LocalTime.of(14, 0),
                 2,
                 4,
-                estrategia
+                new SeleccionPorCapacidad()
         ).orElseThrow();
 
-        // PRUEBA 4: Finalizar una confirmada
-        System.out.println("\nPRUEBA 4");
-        reserva2.finalizar();
-        System.out.println("Estado: " + reserva2.getNombreEstado());
+        System.out.println(reserva);
 
-        // PRUEBA 5: Cancelar una finalizada
-        System.out.println("\nPRUEBA 5");
+        System.out.println("\nLaura cancela la reserva:");
+        reserva.cancelar();
+        System.out.println(reserva);
+
+        System.out.println("\nIntento inválido: confirmar una reserva cancelada.");
 
         try {
-            reserva2.cancelar();
-        } catch (IllegalStateException e) {
-            System.out.println("Error: " + e.getMessage());
+            reserva.confirmar();
+        } catch (IllegalStateException ex) {
+            System.out.println("Operación rechazada: " + ex.getMessage());
         }
 
-        System.out.println(
-            "Estado final reserva 1: " + reserva1.getNombreEstado()
+        System.out.println("\n=== PRUEBA DE SALA PREFERIDA ===");
+
+        fachada.realizarReserva(
+                new Estudiante("E002", "Andrés"),
+                LocalDate.now().plusDays(8),
+                LocalTime.of(10, 0),
+                2,
+                4,
+                new SeleccionSalaPreferida("C")
+        ).ifPresent(System.out::println);
+
+        System.out.println("\n=== PRUEBA SIN SALA ADECUADA ===");
+
+        fachada.realizarReserva(
+                new Estudiante("E003", "Camila"),
+                LocalDate.now().plusDays(9),
+                LocalTime.of(9, 0),
+                2,
+                10,
+                new SeleccionPorCapacidad()
         );
 
-        System.out.println(
-            "Estado final reserva 2: " + reserva2.getNombreEstado()
-        );
+        System.out.println("\n=== PRUEBA DE FINALIZACIÓN ===");
+
+        Reserva otra = fachada.realizarReserva(
+                new Estudiante("E004", "Samuel"),
+                LocalDate.now().plusDays(10),
+                LocalTime.of(11, 0),
+                1,
+                2,
+                new SeleccionPorCapacidad()
+        ).orElseThrow();
+
+        otra.finalizar();
+        System.out.println(otra);
     }
 }
