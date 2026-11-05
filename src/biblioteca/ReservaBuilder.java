@@ -42,7 +42,7 @@ public class ReservaBuilder {
         return this;
     }
 
-    public Reserva buil(){
+    public Reserva build(){
         if (estudiante == null || fecha == null || horaInicio == null || sala == null){
             throw new IllegalStateException("Faltan datos obligatorios de la reserva");
         }
