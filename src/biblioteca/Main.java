@@ -1,30 +1,54 @@
 package biblioteca;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class Main {
     public static void main(String[] args) {
-        List<Sala> disponibles = List.of(
-            new Sala("A", "Sala A", 2),
-            new Sala("B", "Sala B", 4),
-            new Sala("C", "Sala C", 6),
-            new Sala("D", "Sala D", 8)
+
+        // 1. Crear repositorios
+        RepositorioSalas repositorioSalas = new RepositorioSalasMemoria();
+
+        RepositorioReservas repositorioReservas = new RepositorioReservasMemoria();
+
+        // 2. Crear observadores
+        ObservadorReserva notificador = new NotificadorEstudiante();
+
+        ObservadorReserva registro = new RegistroEventos();
+
+        // 3. Crear Facade con los observadores
+        ReservaFacade facade = new ReservaFacade(
+                repositorioSalas,
+                repositorioReservas,
+                List.of(notificador, registro)
         );
 
-        EstrategiaSeleccionSala porCapacidad = new SeleccionPorCapacidad();
-        System.out.println("Para 4 personas: "
-            + porCapacidad.seleccionar(disponibles, 4).orElse(null)
+        // 4. Crear estudiante
+        Estudiante estudiante = new Estudiante("123", "Carlos");
+
+        // 5. Crear estrategia
+        EstrategiaSeleccionSala estrategia = new SeleccionPorCapacidad();
+
+        // 6. Realizar reserva
+        Optional<Reserva> resultado = facade.realizarReserva(
+                estudiante,
+                LocalDate.of(2026, 11, 10),
+                LocalTime.of(10, 0),
+                2,
+                4,
+                estrategia
         );
 
-        EstrategiaSeleccionSala preferida = new SeleccionSalaPreferida("C");
-        System.out.println("Preferida C: "
-            + preferida.seleccionar(disponibles, 4).orElse(null)
-        );
+        // 7. Cancelar reserva
+        if (resultado.isPresent()) {
 
-        EstrategiaSeleccionSala preferidaNoAdecuada = new SeleccionSalaPreferida("B");
-        System.out.println("Preferida B para 7: "
-            + preferida.seleccionar(disponibles, 7).orElse(null)
-        );
-
+            Reserva reserva = resultado.get();
+            reserva.cancelar();
+            System.out.println(
+                "Estado final: " + reserva.getNombreEstado()
+            );
+        }
     }
 }
