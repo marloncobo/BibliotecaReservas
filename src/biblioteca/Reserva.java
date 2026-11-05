@@ -24,13 +24,13 @@ public class Reserva {
         this.duracionHoras = duracionHoras;
         this.cantidadPersonas = cantidadPersonas;
         this.sala = sala;
-        this.estado = Pendiente();
+        this.estado = new Pendiente();
     }
 
     void cambiarEstado(EstadoReserva nuevoEstado){
-        String anterior = estado.nombre;
+        String anterior = estado.nombre();
         this.estado = nuevoEstado;
-        String actual = estado.nombre;
+        String actual = estado.nombre();
         for (ObservadorReserva observador : List.copyOf(observadores)){
             observador.actualizar(this, anterior, actual);
         };
