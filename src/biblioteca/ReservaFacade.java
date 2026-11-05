@@ -2,19 +2,23 @@ package biblioteca;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 public class ReservaFacade {
 
     private final RepositorioSalas repositorioSalas;
     private final RepositorioReservas repositorioReservas;
+    private final List<ObservadorReserva> observadores;
 
     public ReservaFacade(
             RepositorioSalas repositorioSalas,
-            RepositorioReservas repositorioReservas) {
+            RepositorioReservas repositorioReservas,
+            List<ObservadorReserva> observadores) {
 
         this.repositorioSalas = repositorioSalas;
         this.repositorioReservas = repositorioReservas;
+        this.observadores = List.copyOf(observadores);
     }
 
     public Optional<Reserva> realizarReserva(
@@ -43,7 +47,7 @@ public class ReservaFacade {
             .cantidadPersonas(personas)
             .sala(sala.get())
             .build();
-
+        observadores.forEach(reserva::agregarObservador);
         repositorioReservas.guardar(reserva);
         reserva.confirmar();
 
